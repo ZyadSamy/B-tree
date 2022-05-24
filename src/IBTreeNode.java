@@ -9,19 +9,9 @@ public interface IBTreeNode<K extends Comparable<K>, V> {
 	public int getNumOfKeys();
 	
 	/**
-	 * @param numOfKeys
-	 */
-	public void setNumOfKeys(int numOfKeys);
-	
-	/**
 	 * @return isLeaf if the node is leaf or not.
 	 */
 	public boolean isLeaf();
-	
-	/**
-	 * @param isLeaf
-	 */
-	public void setLeaf(boolean isLeaf);
 	
 	/**
 	 * @return the keys return the list of keys of the given node.
@@ -53,15 +43,17 @@ public interface IBTreeNode<K extends Comparable<K>, V> {
 	 */
 	public void setChildren(List<IBTreeNode<K, V>> children);
 
+
+	public K getKey(int i);
+
+	public V getValue(int i);
+
+	public IBTreeNode<K,V> getChild(int i);
+
 	public void insertValue(int i, V value);
 
 	public void insertChild(int i, IBTreeNode<K,V> child);
 
 	public void insertKey(int i, K key);
 
-	public K getKey(int i);
-
-	public IBTreeNode<K,V> getChild(int i);
-
-	public V getValue(int i);
 }
