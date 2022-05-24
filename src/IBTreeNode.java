@@ -56,4 +56,7 @@ public interface IBTreeNode<K extends Comparable<K>, V> {
 
 	public void insertKey(int i, K key);
 
+	public void removeKey(int i);
+	public void removeValue(int i);
+	public void removeChild(int i);
 }

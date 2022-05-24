@@ -79,4 +79,18 @@ public class BTreeNode<K extends Comparable<K>, V> implements IBTreeNode<K, V> {
         this.children.add(i, child);
     }
 
+    @Override
+    public void removeKey(int i) {
+        keys.remove(i);
+    }
+
+    @Override
+    public void removeValue(int i) {
+        values.remove(i);
+    }
+
+    @Override
+    public void removeChild(int i) {
+        children.remove(i);
+    }
 }
