@@ -25,5 +25,11 @@ public class BTreeRunner {
         System.out.println(tree.delete(80));
         tree.print();
         System.out.println(tree.delete(20));
+        tree.print();
+        tree.delete(10);
+        tree.print();
+        tree.delete(30);
+        tree.print();
+
     }
 }
