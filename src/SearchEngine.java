@@ -153,8 +153,26 @@ public class SearchEngine implements ISearchEngine{
     }
 
 
-    public List<ISearchResult> searchByWordWithRanking(String word){return null;}
+    public List<ISearchResult> searchByWordWithRanking(String word){
+
+        return null;
+    }
 
 
     public List<ISearchResult> searchByMultipleWordWithRanking(String sentence){return null;}
+
+//    private void modifiedDFS(String word, IBTreeNode<String, SearchResult> node, List<SearchResult> results)
+//    {
+//        for (String key : node.getKeys())
+//        {
+//            if()
+//        }
+//
+//
+//        if (!node.isLeaf()) {
+//            for (IBTreeNode<String,SearchResult> child: node.getChildren())
+//                modifiedDFS(word, child, results);
+//        }
+//    }
+
 }
