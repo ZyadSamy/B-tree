@@ -88,4 +88,4 @@ $$
     2. node is internal:
         1. if the child that precedes key is not minimal, get the **predecessor** of that key, swap it with target key, and delete target key from leaf.
         2. (symmetric to i) if the child that follows key is not minimal, get the **successor** of that key, swap it with target key, and delete target key from leaf.
-        3. both children that precedes or follows key is not minimal, in that case merge both including the target key in the middle and then recursively delete key.
+        3. both children that precede or follow the key are minimal, in that case merge both including the target key in the middle and then recursively delete                    key.
