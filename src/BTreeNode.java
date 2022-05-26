@@ -2,15 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BTreeNode<K extends Comparable<K>, V> implements IBTreeNode<K, V> {
-    private List<K> keys;
-    private List<V> values;
-    private List<IBTreeNode<K,V>> children;
-
-    public BTreeNode() {
-        keys = new ArrayList<>();
-        values = new ArrayList<>();
-        children = new ArrayList<>();
-    }
+    private List<K> keys = new ArrayList<>();
+    private List<V> values = new ArrayList<>();
+    private List<IBTreeNode<K,V>> children = new ArrayList<>();
 
     @Override
     public int getNumOfKeys() {

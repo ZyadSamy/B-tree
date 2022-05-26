@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.*;
 
 public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
     private final int minimumDegree;
@@ -6,7 +6,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
 
     public BTree(int minimumDegree) {
         this.minimumDegree = minimumDegree;
-        this.root = null;
     }
 
     private void setRoot(IBTreeNode<K, V> root) {
@@ -49,7 +48,6 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
             return search(child, key);
         }
     }
-
 
     @Override
     public void insert(K key, V value) {
@@ -101,12 +99,11 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
     private void splitRoot() {
         int medianIndex = root.getKeys().size() / 2;
 
-        IBTreeNode<K,V> newRoot = new BTreeNode<>();
-
         Pair<IBTreeNode<K,V>> pair = splitNodeAroundMedian(root);
         IBTreeNode<K,V> leftChild = pair.getFirst();
         IBTreeNode<K,V> rightChild = pair.getSecond();
 
+        IBTreeNode<K,V> newRoot = new BTreeNode<>();
         newRoot.insertKey(0, root.getKey(medianIndex));
         newRoot.insertValue(0, root.getValue(medianIndex));
         newRoot.insertChild(0, leftChild);
@@ -132,7 +129,7 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
     }
 
     private Pair<IBTreeNode<K,V>> splitNodeAroundMedian(IBTreeNode<K,V> node) {
-        int medianIndex = node.getKeys().size() / 2;
+        int medianIndex = node.getNumOfKeys() / 2;
 
         IBTreeNode<K,V> leftNode = new BTreeNode<>();
         IBTreeNode<K,V> rightNode = new BTreeNode<>();
@@ -143,25 +140,25 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
         List<V> values = node.getValues();
         int i;
         for (i = 0; i < medianIndex; i++) {
-            leftNode.insertKey(i, keys.get(i));
-            leftNode.insertValue(i, values.get(i));
+            leftNode.getKeys().add(keys.get(i));
+            leftNode.getValues().add(values.get(i));
         }
         for (i += 1; i < keys.size(); i++) {
-            rightNode.insertKey(i - medianIndex - 1, keys.get(i));
-            rightNode.insertValue(i - medianIndex - 1, values.get(i));
+            rightNode.getKeys().add(keys.get(i));
+            rightNode.getValues().add(values.get(i));
         }
 
         // add children to left and to right
-        List<IBTreeNode<K,V>> children = node.getChildren();
         if (!node.isLeaf()) {
+            List<IBTreeNode<K,V>> children = node.getChildren();
             for (i = 0; i < medianIndex; i++) {
                 leftNode.insertChild(i, children.get(i));
-                leftNode.insertChild(i + 1, children.get(i+1));
             }
+            leftNode.insertChild(i, children.get(i));
             for (i += 1; i < keys.size(); i++) {
-                rightNode.insertChild(i - medianIndex - 1, children.get(i));
-                rightNode.insertChild(i - medianIndex, children.get(i+1));
+                rightNode.getChildren().add(children.get(i));
             }
+            rightNode.getChildren().add(children.get(i));
         }
 
         return new Pair<>(leftNode, rightNode);
@@ -180,55 +177,56 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
 
         boolean keyFound = i < node.getNumOfKeys() && key.compareTo(node.getKey(i)) == 0;
 
-        if (keyFound) {
-            // Case 1: Leaf Node
-            if(node.isLeaf()) {
-                node.getKeys().remove(i);
-                node.getValues().remove(i);
-                return true;
-            }
-            // Case 2: internal node
+        if (!keyFound) {
+            if(node.isLeaf()) return false;
 
-            // case 2.a
-            if (!isNodeMinimal(node.getChild(i-1))) {
-                IBTreeNode<K,V> predecessor = getPredecessor(node.getChild(i));
-                int replacementKeyIndex = predecessor.getNumOfKeys() - 1;
-                node.getKeys().set(i, predecessor.getKey(replacementKeyIndex));
-                node.getValues().set(i, predecessor.getValue(replacementKeyIndex));
-                delete(node.getChild(i), predecessor.getKey(replacementKeyIndex));
-                return true;
+            IBTreeNode<K,V> next = node.getChild(i);
+
+            if (isNodeMinimal(next)) {
+                if (i - 1 >= 0 && !isNodeMinimal(node.getChild(i-1)))
+                    borrowFromLeft(node, i);    // case 3.b
+                else if (i + 1 <= node.getNumOfKeys() && !isNodeMinimal(node.getChild(i+1)))
+                    borrowFromRight(node, i);   // case 3.b
+                else {
+                    if (i+1 > node.getNumOfKeys())
+                        merge(node, i-1);
+                    else
+                        merge(node, i);   // case 3.a
+                }
             }
-            // case 2.b
-            else if (!isNodeMinimal(node.getChild(i+1))) {
-                IBTreeNode<K, V> successor = getSuccessor(node.getChild(i+1));
-                int replacementKeyIndex = 0;
-                node.getKeys().set(i, successor.getKey(0));
-                node.getValues().set(i, successor.getValue(replacementKeyIndex));
-                delete(node.getChild(i), successor.getKey(replacementKeyIndex));
-                return true;
-            }
-            // case 2.c
-            else {
-                merge(node, i);
-                delete(node, key);
-                return true;
-            }
+
+            return delete(next, key);
         }
 
-        if(node.isLeaf())
-            return false;
-
-        IBTreeNode<K,V> next = node.getChild(i);
-        if (isNodeMinimal(next)) {
-            if (i - 1 >= 0 && !isNodeMinimal(node.getChild(i-1)))
-                borrowFromLeft(node, i);    // case 3.b
-            else if (i + 1 <= node.getNumOfKeys() && !isNodeMinimal(node.getChild(i+1)))
-                borrowFromRight(node, i);   // case 3.b
-            else
-                merge(node, i);   // case 3.a
+        // Case 1: Leaf Node
+        if(node.isLeaf()) {
+            node.getKeys().remove(i);
+            node.getValues().remove(i);
+            return true;
         }
+        // Case 2: internal node
 
-        return delete(next, key);
+        // case 2.a
+        if (!isNodeMinimal(node.getChild(i)))
+        {
+            IBTreeNode<K,V> predecessor = getPredecessor(node.getChild(i));
+            int replacementKeyIndex = predecessor.getNumOfKeys() - 1;
+            node.getKeys().set(i, predecessor.getKey(replacementKeyIndex));
+            node.getValues().set(i, predecessor.getValue(replacementKeyIndex));
+            return delete(node.getChild(i), predecessor.getKey(replacementKeyIndex));
+        }
+        // case 2.b
+        else if (!isNodeMinimal(node.getChild(i+1))) {
+            IBTreeNode<K, V> successor = getSuccessor(node.getChild(i+1));
+            node.getKeys().set(i, successor.getKey(0));
+            node.getValues().set(i, successor.getValue(0));
+            return delete(node.getChild(i), successor.getKey(0));
+        }
+        // case 2.c
+        else {
+            merge(node, i);
+            return delete(node, key);
+        }
     }
 
     private IBTreeNode<K,V> getPredecessor(IBTreeNode<K,V> node) {
@@ -284,48 +282,89 @@ public class BTree<K extends Comparable<K>, V> implements IBTree<K, V> {
         IBTreeNode<K,V> first   = parent.getChild(index);
         IBTreeNode<K,V> second = parent.getChild(index + 1);
 
-        List<K> keys   = first.getKeys();
-        List<V> values = first.getValues();
-        List<IBTreeNode<K,V>> children = first.getChildren();
+        int mergedKeySize = first.getNumOfKeys() + second.getNumOfKeys() + 1;
+        List<K> keys = new ArrayList<>(mergedKeySize);
+        List<V> values = new ArrayList<>(mergedKeySize);
+        List<IBTreeNode<K,V>> children = new ArrayList<>(mergedKeySize+1);
+
+        keys.addAll(first.getKeys());
+        values.addAll(first.getValues());
+        children.addAll(first.getChildren());
 
         keys.add(parent.getKey(index));
         values.add(parent.getValue(index));
         parent.removeKey(index);
         parent.removeValue(index);
 
-        for (int i = 0; i < second.getNumOfKeys(); i++) {
-            keys.add(second.getKey(i));
-            values.add(second.getValue(i));
-            if (!second.isLeaf()) {
-                children.add(second.getChild(i));
-                children.add(second.getChild(i+1));
-            }
-        }
+        keys.addAll(second.getKeys());
+        values.addAll(second.getValues());
+        children.addAll(second.getChildren());
 
         parent.removeChild(index+1);
         parent.removeChild(index);
         parent.insertChild(index, first);
 
-        if (parent == this.root && parent.getNumOfKeys() == 0)
-            this.root = first;
+        first.setKeys(keys);
+        first.setValues(values);
+        first.setChildren(children);
+
+        if (parent == root && parent.getNumOfKeys() == 0)
+            root = first;
     }
 
 
-    // pre-order traversal
+    /* The following functions are for debugging purposes. */
+
+    public void check() {
+        checkNodeProperties(root);
+    }
+
+    private void checkNodeProperties(IBTreeNode<K,V> node) {
+        int keysSize = node.getKeys().size();
+        int childrenSize = node.getChildren().size();
+
+        if (keysSize < minimumDegree-1 && node != root)
+            System.out.println("Node is less than minimum");
+
+        if (keysSize > (2*minimumDegree)-1)
+            System.out.println("Node is larger than maximum");
+
+        if (keysSize+1 != childrenSize && !node.isLeaf())
+            System.out.println("Keys: " + node.getKeys().size() + " Children: " + node.getChildren().size());
+
+        for (IBTreeNode<K,V> child: node.getChildren())
+            checkNodeProperties(child);
+    }
+
     public void print() {
-        dfs(root);
-        System.out.println("");
-    }
+        int level = 0;
+        Queue<IBTreeNode<K,V>> nodes = new LinkedList<>();
+        Queue<Integer> levels = new LinkedList<>();
+        nodes.add(root);
+        levels.add(level);
+        System.out.print("Level 0: ");
+        while (!nodes.isEmpty()) {
+            IBTreeNode<K,V> cur = nodes.poll();
+            int curlevel = levels.poll();
 
-    private void dfs(IBTreeNode<K,V> node) {
-        for (K key : node.getKeys())
-            System.out.print(key + " ");
-        System.out.print("- ");
-
-        if (!node.isLeaf()) {
-            System.out.print("> ");
-            for (IBTreeNode<K,V> child: node.getChildren())
-                dfs(child);
+            if (level < curlevel)  {
+                level = curlevel;
+                System.out.print("\nLevel " + level + ": ");
+            }
+            printNode(cur);
+            for (IBTreeNode<K,V> child: cur.getChildren()) {
+                nodes.add(child);
+                levels.add(level+1);
+            }
         }
+        System.out.println();
     }
+
+    private void printNode(IBTreeNode<K,V> node) {
+        System.out.print("[");
+        for (K key : node.getKeys())
+            System.out.print(key+",");
+        System.out.print("]");
+    }
+
 }

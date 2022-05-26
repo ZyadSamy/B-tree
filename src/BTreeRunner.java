@@ -9,27 +9,27 @@ public class BTreeRunner {
         tree.insert(60, "f");
         tree.insert(70, "g");
         tree.insert(80, "j");
-//        tree.insert(90, "k");
+        tree.insert(90, "k");
 
-        System.out.println(tree.search(10));
-        System.out.println(tree.search(20));
-        System.out.println(tree.search(30));
-        System.out.println(tree.search(40));
-        System.out.println(tree.search(50));
-        System.out.println(tree.search(60));
-        System.out.println(tree.search(70));
-        System.out.println(tree.search(80));
-        System.out.println(tree.search(90));
+//        System.out.println(tree.search(10));
+//        System.out.println(tree.search(20));
+//        System.out.println(tree.search(30));
+//        System.out.println(tree.search(40));
+//        System.out.println(tree.search(50));
+//        System.out.println(tree.search(60));
+//        System.out.println(tree.search(70));
+//        System.out.println(tree.search(80));
+//        System.out.println(tree.search(90));
 
-        tree.print();
-        System.out.println(tree.delete(80));
-        tree.print();
-        System.out.println(tree.delete(20));
-        tree.print();
-        tree.delete(10);
-        tree.print();
-        tree.delete(30);
-        tree.print();
+//        tree.print();
+//        System.out.println(tree.delete(80));
+//        tree.print();
+//        System.out.println(tree.delete(20));
+//        tree.print();
+//        tree.delete(10);
+//        tree.print();
+//        tree.delete(30);
+//        tree.print();
 
     }
 }
