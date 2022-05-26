@@ -79,8 +79,8 @@ $$
 1. if k is not found in node:
     1. node is leaf, so k doesn’t exist in the tree return **false**.
     2. node is internal:
-        1. if next node is minimal, Delete(next, k)
-        2. if next node is not minimal
+        1. if next node is not minimal, Delete(next, k)
+        2. if next node is minimal
             1. if the sibling left node or right node of next node is non minimal borrow a key from that node. 
             2. if both sibling is minimal, merge them both with node.key[i] at the middle of the 2 nodes key.    [left, K, right]
 2. if k found in node:
