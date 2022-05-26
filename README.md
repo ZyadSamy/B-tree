@@ -46,7 +46,7 @@ $$
 | Insertion | O(log h) |
 | Deletion | O(log h) |
 
-| Space complexity | O(n)
+| Space complexity | O(n)|
 
 # Searching
 
