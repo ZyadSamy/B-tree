@@ -12,9 +12,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 
 public class SearchEngine implements ISearchEngine{
@@ -154,6 +152,12 @@ public class SearchEngine implements ISearchEngine{
 
         modifiedDFS(word, docTree.getRoot(), results);
 
+        Collections.sort(results, new Comparator<ISearchResult>() {
+            public int compare(ISearchResult p1, ISearchResult p2) {
+                return p2.getRank() - p1.getRank();
+            }
+        });
+
         return results;
     }
 
@@ -162,6 +166,12 @@ public class SearchEngine implements ISearchEngine{
         List<ISearchResult> results = new ArrayList<>();
 
         modifiedDFS(sentence, docTree.getRoot(), results);
+
+        Collections.sort(results, new Comparator<ISearchResult>() {
+            public int compare(ISearchResult p1, ISearchResult p2) {
+                return p2.getRank() - p1.getRank();
+            }
+        });
 
         return results;
     }
